@@ -2,12 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
+* {
     margin: 0;
     padding: 0;
     color: white;
 }
 
-body{
+body {
     background-color: #222831;
+}
+
+.drop-zone {
+    @apply transition-all duration-300 ease-in-out;
+}
+
+.drop-zone.active {
+    @apply blur-sm;
 }
