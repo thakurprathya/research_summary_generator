@@ -686,6 +686,11 @@ video {
   background-color: rgb(243 244 246 / var(--tw-bg-opacity));
 }
 
+.bg-gray-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity));
+}
+
 .bg-indigo-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(99 102 241 / var(--tw-bg-opacity));
@@ -761,6 +766,11 @@ video {
 *{
   margin: 0;
   padding: 0;
+  color: white;
+}
+
+body{
+  background-color: #222831;
 }
 
 .hover\:bg-gray-200:hover {
