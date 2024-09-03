@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "tailwindcss -i ./static/styles.css -o ./static/output.css",
+    "build:css": "tailwindcss -i ./static/styles.css -o ./static/output.css --watch",
     "watch:css": "npm-watch"
   },
   "watch": {
