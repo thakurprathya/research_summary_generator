@@ -28,6 +28,12 @@ def getLinks(name: str, research_papers: str) -> list:
         printErr(e)
         return []
     
+def getAbstract(links: list) -> list:
+    """
+    Takes list of links and returns abstract for each link
+    """
+    return []
+
 def getProfile(path: str) -> list:
     """
     Takes path for excel sheet and returns faculty's profile of research papers
@@ -43,7 +49,7 @@ def getProfile(path: str) -> list:
         faculty_list = df.iloc[1:, 2].tolist()
         name = df.iloc[1, 0]
         try:
-            links: list = getLinks(name, faculty_list)
+            links = getLinks(name, faculty_list)
             return links
         except:
             raise Exception("API ERROR :: Couldn't fetch data from google")
