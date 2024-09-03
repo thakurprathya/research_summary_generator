@@ -1,0 +1,33 @@
+{
+  "name": "src",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./static/styles.css -o ./static/output.css",
+    "watch:css": "npm-watch"
+  },
+  "watch": {
+    "css": {
+      "patterns": [
+        "static/styles.css",
+        "templates/**/*.html"
+      ],
+      "extensions": "css,html",
+      "quiet": false,
+      "parallel": false
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.44",
+    "tailwindcss": "^3.4.10"
+  },
+  "devDependencies": {
+    "npm-watch": "^0.13.0"
+  }
+}
