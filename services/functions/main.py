@@ -28,10 +28,26 @@ def getLinks(name: str, research_papers: str) -> list:
         printErr(e)
         return []
     
-def getAbstract(links: list) -> list:
+def getBodyScrape(links: list) -> list:
     """
     Takes list of links and returns abstract for each link
     """
+    try:
+        abstracts = []
+        for link in links:
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+            req = requests.Session()
+            response = req.get(link, headers=headers)
+            soup = bs(response.text, 'html.parser')
+            abstract = ' '.join(soup.stripped_strings)
+            abstracts.append(abstract)
+        return abstracts
+    except Exception as e:
+        printErr(e)
+        return []
+        
+def getAbstract(content: list) -> list:
+    # TODO: Use Ollama to generate summaries
     return []
 
 def getProfile(path: str) -> list:
@@ -48,11 +64,22 @@ def getProfile(path: str) -> list:
     try:
         faculty_list = df.iloc[1:, 2].tolist()
         name = df.iloc[1, 0]
-        try:
-            links = getLinks(name, faculty_list)
-            return links
-        except:
-            raise Exception("API ERROR :: Couldn't fetch data from google")
+        
+        links = getLinks(name, faculty_list)
+        if(links):
+            bodyScrape = getBodyScrape(links)
+            if(bodyScrape):
+                abstracts = getAbstract(bodyScrape)
+                if(abstracts):
+                    return abstracts
+                    print(abstracts)
+                else:
+                    raise Exception("LLAMA ERROR :: Couldn't generate summary")
+            else:
+                raise Exception("API ERROR :: Couldn't fetch body content from links")
+        else:
+            raise Exception("API ERROR :: Couldn't fetch links from google")
+            
     except Exception as e:
         printErr(e)
         return []
