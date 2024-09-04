@@ -66,17 +66,10 @@ def getAbstract(sites: list) -> list:
             f.write(ollamaResponse)
     return abstracts
 
-def getProfile(path: str) -> pd.DataFrame | None:
+def getProfile(df: pd.Dataframe) -> pd.DataFrame | None:
     """
-    Takes path for excel sheet and returns faculty's profile of research papers
+    Takes in pandas dataframe and returns faculty's profile of research papers as dataframe
     """
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), path))
-    try:
-        df = pd.read_excel(path)
-    except Exception as e:
-        printErr(e)
-        return None
-    
     try:
         faculty_list = df.iloc[1:, 2].tolist()
         name = df.iloc[1, 0]
