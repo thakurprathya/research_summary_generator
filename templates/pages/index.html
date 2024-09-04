@@ -14,19 +14,19 @@
     {% include 'components/header.html' %}
 
     <section>
-            <div class="h-[100vh] flex items-center justify-center">
-                <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
-                    <div class="md:w-1/2 mb-8 md:mb-0">
-                        <h1 id="hero-text"
-                            class="font-roboto text-6xl font-extrabold text-[#6c7c7d] leading-tight animate-blink overflow-hidden min-h-[3em]">
-                        </h1>
-                    </div>
-                    <div class="md:w-1/2 flex justify-center">
-                        <img class="w-full max-w-2xl" src="{{ url_for('static', filename='assets/vector2.png') }}" alt="vector">
-                    </div>
+        <div class="mt-5 sm:mt-0 h-[100vh] flex items-center justify-center">
+            <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h1 id="hero-text"
+                        class="font-roboto text-3xl font-extrabold sm:text-6xl sm:font-extrabold text-[#6c7c7d] leading-tight animate-blink overflow-hidden min-h-[3em]">
+                    </h1>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img class="w-full max-w-2xl" src="{{ url_for('static', filename='assets/vector2.png') }}" alt="vector">
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
     {% include 'components/footer.html' %}
 </body>
