@@ -657,10 +657,6 @@ video {
   height: 1rem;
 }
 
-.h-\[20rem\] {
-  height: 20rem;
-}
-
 .h-\[25rem\] {
   height: 25rem;
 }
@@ -809,18 +805,6 @@ video {
   font-weight: 600;
 }
 
-.font-\[5px\] {
-  font-weight: 5px;
-}
-
-.font-\[1rem\] {
-  font-weight: 1rem;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
 .leading-6 {
   line-height: 1.5rem;
 }
@@ -857,11 +841,6 @@ video {
 .text-gray-900 {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
-}
-
-.text-black {
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
 * {
