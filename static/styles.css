@@ -14,14 +14,15 @@
 
 body {
     background-color: #222831;
+    scroll-behavior: smooth;
     @apply font-poppins;
 }
 
-.drop-zone {
+.dropzone {
     @apply transition-all duration-300 ease-in-out;
 }
 
-.drop-zone.active {
+.dropzone.active {
     @apply blur-sm;
 }
 

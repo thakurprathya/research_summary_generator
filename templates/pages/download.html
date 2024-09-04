@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload File</title>
+    <title>Download File</title>
     <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
     <link rel="icon" href="{{ url_for('static', filename='assets/logo.svg') }}" type="image/x-icon">
 </head>
 
-<body class="drop-zone w-full">
+<body class="w-full">
     {% include 'components/header.html' %}
-    <section class="mt-[5rem] flex flex-col items-center">
-        {% include 'components/dropzone.html' %}
+    <section class="h-[100vh] flex flex-col items-center">
+        
     </section>
     {% include 'components/footer.html' %}
 </body>

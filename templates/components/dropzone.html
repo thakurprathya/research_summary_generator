@@ -1,28 +1,28 @@
-<div class="m-[4rem] w-[80%] h-[50rem] rounded-lg col-span-full flex justify-center items-center border-2 border-dashed border-[#EEEEEE] px-6 py-10"
-    style="background: linear-gradient(to bottom, #31363F 10%, #76ABAE 100%);" ondragover="allowDrop(event)"
-    ondrop="drop(event)">
-    <div class="text-center">
-        <svg class="mx-auto h-[4.5rem] w-[4.5rem] text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+<div
+    class="m-[4rem] h-[30rem] mt-0 w-[80%] rounded-lg col-span-full flex justify-center items-center border-2 border-dashed border-[#d2d2d2] px-6 py-10">
+    <div class="text-center overflow-hidden">
+        <svg class="mx-auto h-[4.5rem] w-[4.5rem] text-gray-300" viewBox="0 0 24 24" fill="currentColor"
+            aria-hidden="true">
             <path fill-rule="evenodd"
                 d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
                 clip-rule="evenodd" />
         </svg>
         <div class="mt-4 flex text-sm leading-6 text-gray-600">
             <label for="file-upload"
-                class="relative cursor-pointer rounded-md bg-white font-semibold text-[#76ABAE] hover:bg-[#76ABAE] hover:text-[#222831]">
+                class="relative cursor-pointer rounded-md bg-white font-semibold text-[#76ABAE] hover:bg-[#76ABAE] hover:text-[#222831] overflow-hidden">
                 <span class="text-[#222831] p-2">Upload a file</span>
                 <input id="file-upload" name="file-upload" type="file" class="sr-only"
                     onchange="handleFileInputChange(event)">
             </label>
-            <p class="pl-1">or drag and drop</p>
+            <p class="pl-1 text-[#76ABAE]">or drag and drop</p>
         </div>
-        <p class="text-[14px] leading-8 text-gray-900 font-semibold">.xlsx, .ods</p>
+        <p class="text-[14px] leading-8 text-[#eeeeee] font-semibold">.xlsx, .ods</p>
     </div>
 </div>
 
 <script>
-    const dropZone = document.querySelector('.drop-zone');
-    const allowedExtensions = ['xlsx'];
+    const dropZone = document.querySelector('.dropzone');
+    const allowedExtensions = ['xlsx', 'ods'];
 
     dropZone.addEventListener('dragover', (event) => {
         event.preventDefault();
@@ -52,7 +52,7 @@
     function handleFiles(files) {
         for (const file of files) {
             const fileExtension = file.name.split('.').pop().toLowerCase();
-            if(!allowedExtensions.includes(fileExtension)) {
+            if (!allowedExtensions.includes(fileExtension)) {
                 alert('file type not allowed.');
                 continue;
             }
@@ -69,15 +69,16 @@
             method: 'POST',
             body: formData,
         })
-        .then(response => {
-            if (!response.ok){ throw new Error('Network response was not ok'); }
-            return response.json();
-        })
-        .then(data => {
-            console.log('File uploaded successfully:', data);
-        })
-        .catch(error => {
-            console.error('Error uploading file:', error);
-        });
+            .then(response => {
+                if (!response.ok) { throw new Error('Network response was not ok'); }
+                return response.json();
+            })
+            .then(data => {
+                console.log('File uploaded successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error uploading file:', error);
+            });
     }
+
 </script>
