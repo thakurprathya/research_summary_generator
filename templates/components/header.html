@@ -1,0 +1,11 @@
+<header class="fixed top-2 mx-auto w-full body-font z-20">
+    <div class="container mx-auto w-[85%] flex flex-wrap p-5 px-10 rounded-[2rem] flex-col md:flex-row items-center" style="backdrop-filter: blur(10px) brightness(70%);">
+        <a href="{{ url_for('home') }}" class="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0 cursor-pointer">
+            <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="logo" class="w-12">
+            <span class="ml-3 text-xl">ResSummarize</span>
+        </a>
+        <nav class="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400 flex flex-wrap items-center text-base justify-center">
+            <a href="{{ url_for('upload') }}" class="mr-5 hover:text-[#76ABAE] cursor-pointer">Upload</a>
+        </nav>
+    </div>
+</header>
