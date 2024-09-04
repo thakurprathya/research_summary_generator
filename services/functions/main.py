@@ -2,6 +2,7 @@ import requests
 import ollama
 import pandas as pd
 import os
+import time
 from bs4 import BeautifulSoup as bs
 
 # Define the llama model to be used for summary generation
@@ -65,7 +66,7 @@ def getAbstract(sites: list) -> list:
             f.write(ollamaResponse)
     return abstracts
 
-def getProfile(path: str) -> list:
+def getProfile(path: str) -> pd.DataFrame | None:
     """
     Takes path for excel sheet and returns faculty's profile of research papers
     """
@@ -74,7 +75,7 @@ def getProfile(path: str) -> list:
         df = pd.read_excel(path)
     except Exception as e:
         printErr(e)
-        return []
+        return None
     
     try:
         faculty_list = df.iloc[1:, 2].tolist()
@@ -86,7 +87,15 @@ def getProfile(path: str) -> list:
             if(bodyScrape):
                 abstracts = getAbstract(bodyScrape)
                 if(abstracts):
-                    return abstracts
+                    dfOutput = pd.DataFrame({
+                        "name": [name] * len(faculty_list),
+                        "title": faculty_list,
+                        "link": links,
+                        "abstract": abstracts
+                    })
+                    uniqueId = str(int(time.time()))
+                    dfOutput.to_excel(f'{uniqueId}.xlsx', index=False)
+                    return dfOutput
                 else:
                     raise Exception("LLAMA ERROR :: Couldn't generate summary")
             else:
@@ -96,7 +105,7 @@ def getProfile(path: str) -> list:
             
     except Exception as e:
         printErr(e)
-        return []
+        return None
 
 if __name__ == '__main__':
     getProfile("../../static/assets/demo.xlsx")
