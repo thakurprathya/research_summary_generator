@@ -1,7 +1,11 @@
 import requests
+import ollama
 import pandas as pd
 import os
 from bs4 import BeautifulSoup as bs
+
+# Define the llama model to be used for summary generation
+model = "llama3.1:8b"
 
 def printErr(e: Exception) -> None:
     print("ERROR :: ", e)
@@ -46,9 +50,20 @@ def getBodyScrape(links: list) -> list:
         printErr(e)
         return []
         
-def getAbstract(content: list) -> list:
-    # TODO: Use Ollama to generate summaries
-    return []
+def getAbstract(sites: list) -> list:
+    abstracts = []
+    prompt = "You are a scientific summarizer. Your task is to create a concise and informative abstract for a research paper based on the following content scraped from a publication site. Focus on the main objectives, methods, key findings, and conclusions. The summary should be approximately 150-200 words long. Here's the content to summarize:\n\n"
+    
+    for data in sites:
+        response = ollama.chat(model=model, messages=[{
+                'role': 'user',
+                'content': prompt+data
+            }])
+        ollamaResponse = response['message']['content']
+        abstracts.append(ollamaResponse)
+        with open("output_summary.txt", "a+", encoding="utf-8") as f:
+            f.write(ollamaResponse)
+    return abstracts
 
 def getProfile(path: str) -> list:
     """
@@ -72,7 +87,6 @@ def getProfile(path: str) -> list:
                 abstracts = getAbstract(bodyScrape)
                 if(abstracts):
                     return abstracts
-                    print(abstracts)
                 else:
                     raise Exception("LLAMA ERROR :: Couldn't generate summary")
             else:
@@ -84,4 +98,5 @@ def getProfile(path: str) -> list:
         printErr(e)
         return []
 
-getProfile("../../static/assets/demo.xlsx")
+if __name__ == '__main__':
+    getProfile("../../static/assets/demo.xlsx")
