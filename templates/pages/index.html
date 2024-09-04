@@ -30,11 +30,7 @@
 
     {% include 'components/footer.html' %}
 
-    <script>
-        window.addEventListener('load', () => {
-            window.scrollTo(0, 0);
-        });
-        
+    <script>        
         document.addEventListener("DOMContentLoaded", function () {
             const heroTextElement = document.getElementById("hero-text");
             const phrases = [
@@ -79,6 +75,22 @@
             }
 
             setTimeout(typeEffect, 1000);
+
+            // handling scrollto url parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const scrollToId = urlParams.get('scrollTo');
+            
+            if (scrollToId) {
+                const targetElement = document.getElementById(scrollToId);
+                if (targetElement) {
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
         });
     </script>
 </body>
