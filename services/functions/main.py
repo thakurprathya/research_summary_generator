@@ -1,7 +1,6 @@
 import requests
 import ollama
 import pandas as pd
-import os
 import time
 from bs4 import BeautifulSoup as bs
 
