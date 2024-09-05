@@ -1,9 +1,15 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for, render_template, flash
+from flask import Flask, render_template, request, render_template, jsonify
+from services.models import create_faculty, get_all_faculty
+from services.db_config import get_db_connection
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+db, connection_status = get_db_connection()
 
+# Application routes
 @app.route('/')
 def home():
     return render_template('pages/index.html')
@@ -21,6 +27,34 @@ def upload():
 @app.route('/download')
 def download():
     return render_template('pages/download.html')
+
+
+# Database routes
+@app.route('/test_connection', methods=['GET'])
+def test_connection():
+    if db:
+        return jsonify({'status': 'success', 'message': connection_status})
+    else:
+        return jsonify({'status': 'error', 'message': connection_status}), 500
+    
+@app.route('/add_faculty', methods=['POST'])
+def add_faculty():
+    try:
+        data = request.json
+        name = data.get('name')
+        research = data.get('research', [])
+        faculty_id = create_faculty(name, research)
+        return jsonify({'message': 'Faculty member added successfully', 'id': faculty_id}), 201
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/get_all_faculty', methods=['GET'])
+def get_all_faculty():
+    try:
+        faculty_members = get_all_faculty()
+        return jsonify(faculty_members)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
