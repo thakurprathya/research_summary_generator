@@ -1,6 +1,8 @@
 import requests
 import ollama
 import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import time
 from bs4 import BeautifulSoup as bs
 
@@ -32,22 +34,32 @@ def getLinks(name: str, research_papers: str) -> list:
         printErr(e)
         return []
     
-def getBodyScrape(links: list) -> list:
+def getBodyScrape(links: list[str]) -> list[str]:
     """
-    Takes list of links and returns abstract for each link
+    Takes list of links and returns text content for each link using Selenium with Chrome.
     """
     try:
-        abstracts = []
+        options = Options()
+        options.headless = True
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('start-maximized')
+        options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
+
+        driver = webdriver.Chrome(options=options)
+
+        content = []
         for link in links:
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-            req = requests.Session()
-            response = req.get(link, headers=headers)
-            soup = bs(response.text, 'html.parser')
-            abstract = ' '.join(soup.stripped_strings)
-            abstracts.append(abstract)
-        return abstracts
+            driver.get(link)
+            soup = bs(driver.page_source, 'html.parser')
+            text = ' '.join(soup.stripped_strings)
+            content.append(text)
+
+        driver.quit()
+        return content
     except Exception as e:
-        printErr(e)
+        print(f"Error: {e}")
         return []
         
 def getAbstract(sites: list) -> list:
@@ -65,7 +77,7 @@ def getAbstract(sites: list) -> list:
             f.write(ollamaResponse)
     return abstracts
 
-def getProfile(df: pd.Dataframe) -> pd.DataFrame | None:
+def getProfile(df: pd.DataFrame) -> pd.DataFrame | None:
     """
     Takes in pandas dataframe and returns faculty's profile of research papers as dataframe
     """
@@ -100,4 +112,6 @@ def getProfile(df: pd.Dataframe) -> pd.DataFrame | None:
         return None
 
 if __name__ == '__main__':
-    getProfile("../../static/assets/demo.xlsx")
+    path = "../../static/assets/demo.xlsx"
+    df = pd.read_excel(path)
+    getProfile(df)
