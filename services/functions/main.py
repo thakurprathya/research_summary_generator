@@ -32,7 +32,7 @@ def getLinks(name: str, research_papers: str) -> list:
         printErr(e)
         return []
     
-def getBodyScrape(links: list) -> list:
+def getBodyScrape(links: list[str]) -> list[str]:
     """
     Takes list of links and returns abstract for each link
     """
@@ -50,7 +50,7 @@ def getBodyScrape(links: list) -> list:
         printErr(e)
         return []
         
-def getAbstract(sites: list) -> list:
+def getAbstract(sites: list[str]) -> list[str]:
     abstracts = []
     prompt = "You are a scientific summarizer. Your task is to create a concise and informative abstract for a research paper based on the following content scraped from a publication site. Focus on the main objectives, methods, key findings, and conclusions. The summary should be approximately 150-200 words long. Here's the content to summarize:\n\n"
     
@@ -65,7 +65,7 @@ def getAbstract(sites: list) -> list:
             f.write(ollamaResponse)
     return abstracts
 
-def getProfile(df: pd.Dataframe) -> pd.DataFrame | None:
+def getProfile(df: pd.DataFrame) -> pd.DataFrame | None:
     """
     Takes in pandas dataframe and returns faculty's profile of research papers as dataframe
     """
