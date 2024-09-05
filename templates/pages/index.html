@@ -4,77 +4,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>ReSummarize</title>
     <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
     <link rel="icon" href="{{ url_for('static', filename='assets/logo.svg') }}" type="image/x-icon">
 </head>
 </head>
 
-<body class="w-full">
+<body class="dropzone w-full" ondragover="allowDrop(event)" ondrop="drop(event)">
     {% include 'components/header.html' %}
 
     <section>
-        <div class="w-[150vw] h-[220vh] absolute -top-[125%] -left-[25%] rounded-full z-[-1]"
-            style="background: linear-gradient(to bottom, #31363F 60%, #76ABAE 100%);">
-        </div>
-        <div class="h-[100vh] flex flex-col items-center justify-center">
-            <img class="w-[50rem]" src="{{ url_for('static', filename='assets/vector2.png') }}" alt="vector">
+        <img src="{{ url_for('static', filename='assets/gradient.png') }}" alt="bg"
+            class="absolute top-0 left-0 z-[-1]">
+        <div class="h-[100vh] flex flex-col lg:flex-row items-center justify-center">
             <h1 id="hero-text"
-                class="w-[50%] mt-5 font-roboto text-4xl font-bold text-[#222831] text-center flex-wrap break-words animate-blink overflow-hidden border-none">
+                class="lg:-mt-[10rem] w-[40%] font-roboto text-4xl font-bold text-white text-center flex-wrap break-words animate-blink overflow-hidden border-none">
             </h1>
+            <img class="lg:-mt-[10rem] w-[40rem]" src="{{ url_for('static', filename='assets/vector2.png') }}"
+                alt="vector">
+        </div>
+        <div id="dropzone-div" class="flex justify-center items-center h-[100vh]">
+            {% include 'components/dropzone.html' %}
         </div>
     </section>
 
     {% include 'components/footer.html' %}
+
+    <script>        
+        document.addEventListener("DOMContentLoaded", function () {
+            const heroTextElement = document.getElementById("hero-text");
+            const phrases = [
+                "Your Research, Summarized!",
+                "Effortless Faculty Profiles.",
+                "Streamline Your Publications."
+            ];
+
+            let phraseIndex = 0;
+            let letterIndex = 0;
+            let currentPhrase = "";
+            let isDeleting = false;
+            let speed = 100;
+
+            function typeEffect() {
+                heroTextElement.textContent = currentPhrase.slice(0, letterIndex) + '|';
+
+                if (!isDeleting && letterIndex <= phrases[phraseIndex].length) {
+                    letterIndex++;
+                    heroTextElement.textContent = phrases[phraseIndex].slice(0, letterIndex) + '|';
+                }
+
+                if (isDeleting && letterIndex <= phrases[phraseIndex].length) {
+                    letterIndex--;
+                    heroTextElement.textContent = phrases[phraseIndex].slice(0, letterIndex) + '|';
+                }
+
+                if (letterIndex === phrases[phraseIndex].length) {
+                    isDeleting = true;
+                    speed = 50;
+                    setTimeout(typeEffect, 1000);
+                    return;
+                }
+
+                if (isDeleting && letterIndex === 0) {
+                    isDeleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    speed = 100;
+                }
+
+                setTimeout(typeEffect, speed);
+            }
+
+            setTimeout(typeEffect, 1000);
+
+            // handling scrollto url parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const scrollToId = urlParams.get('scrollTo');
+            
+            if (scrollToId) {
+                const targetElement = document.getElementById(scrollToId);
+                if (targetElement) {
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        });
+    </script>
 </body>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const heroTextElement = document.getElementById("hero-text");
-        const phrases = [
-            "Your Research, Summarized!",
-            "Effortless Faculty Profiles.",
-            "Streamline Your Publications."
-        ];
-
-        let phraseIndex = 0;
-        let letterIndex = 0;
-        let currentPhrase = "";
-        let isDeleting = false;
-        let speed = 100;
-
-        function typeEffect() {
-            heroTextElement.textContent = currentPhrase.slice(0, letterIndex) + '|';
-
-            if (!isDeleting && letterIndex <= phrases[phraseIndex].length) {
-                letterIndex++;
-                heroTextElement.textContent = phrases[phraseIndex].slice(0, letterIndex) + '|';
-            }
-
-            if (isDeleting && letterIndex <= phrases[phraseIndex].length) {
-                letterIndex--;
-                heroTextElement.textContent = phrases[phraseIndex].slice(0, letterIndex) + '|';
-            }
-
-            if (letterIndex === phrases[phraseIndex].length) {
-                isDeleting = true;
-                speed = 50;
-                setTimeout(typeEffect, 1000);
-                return;
-            }
-
-            if (isDeleting && letterIndex === 0) {
-                isDeleting = false;
-                phraseIndex = (phraseIndex + 1) % phrases.length;
-                speed = 100;
-            }
-
-            setTimeout(typeEffect, speed);
-        }
-
-        setTimeout(typeEffect, 1000);
-    });
-</script>
-
 
 </html>
