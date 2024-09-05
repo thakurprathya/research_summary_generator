@@ -1,6 +1,7 @@
 import os
 from pymongo import MongoClient, errors
 from dotenv import load_dotenv
+from pymongo.common import MAX_POOL_SIZE, SERVER_SELECTION_TIMEOUT
 
 load_dotenv()
 
@@ -9,26 +10,27 @@ mongodb_db = os.getenv('MONGODB_DB')
 
 def get_db_connection():
     try:
-        client = MongoClient(mongodb_uri)
+        client = MongoClient(mongodb_uri, serverselectiontimeoutms=5000, maxpoolsize=5000)
         client.admin.command('ping')
-        db = client[mongodb_db]
-        connection_status = 'Connection successful'
+        client.server_info()
+        db = client[mongodb_db] if mongodb_db is not None else None
         
-        faculty_collection = db['faculty']
-        faculty_collection.create_index('name', unique=True)
+        if db is not None:
+            faculty_collection = db['faculty']
+            faculty_collection.create_index('name', unique=True)
+            return db, "Connection successful"
+        else:
+            raise Exception("Database not found")
+        
     except errors.ServerSelectionTimeoutError as e:
-        db = None
-        connection_status = 'Connection failed'
         error_message = str(e)
+        return None, "Connection failed: Server selection timeout"
     except errors.InvalidURI as e:
-        db = None
-        connection_status = 'Invalid URI'
         error_message = str(e)
+        return None, "Connection failed: Invalid URI"
+    except errors.OperationFailure as e:
+        error_message = str(e)
+        return None, "Connection failed: Authentication error"
     except Exception as e:
-        db = None
-        connection_status = 'Connection failed'
         error_message = str(e)
-    else:
-        connection_status = 'Connection successful'
-    
-    return db, connection_status
+        return None, f"Connection failed: {str(e)}"
