@@ -45,6 +45,7 @@ def getBodyScrape(links: list[str]) -> list[str]:
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('start-maximized')
+        options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
 
         driver = webdriver.Chrome(options=options)
@@ -82,18 +83,20 @@ def getProfile(df: pd.DataFrame) -> pd.DataFrame | None:
     Takes in pandas dataframe and returns faculty's profile of research papers as dataframe
     """
     try:
-        faculty_list = df.iloc[1:, 2].tolist()
-        name = df.iloc[1, 0]
+        name = df.iloc[1:, 0].tolist()
+        year = df.iloc[1:, 1].tolist()
+        title = df.iloc[1:, 2].tolist()
         
-        links = getLinks(name, faculty_list)
+        links = getLinks(name, title)
         if(links):
             bodyScrape = getBodyScrape(links)
             if(bodyScrape):
                 abstracts = getAbstract(bodyScrape)
                 if(abstracts):
                     dfOutput = pd.DataFrame({
-                        "name": [name] * len(faculty_list),
-                        "title": faculty_list,
+                        "name": [name] * len(title),
+                        "year": year,
+                        "title": title,
                         "link": links,
                         "abstract": abstracts
                     })
