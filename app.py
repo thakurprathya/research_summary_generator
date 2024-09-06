@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, request, render_template, jsonify
+from flask import Flask, render_template, request, render_template, jsonify, redirect, url_for, send_file
 from werkzeug.exceptions import BadRequest
 from services.models import create_faculty, get_all
 from services.db_config import get_db_connection
@@ -20,15 +20,18 @@ def upload():
     if request.method == 'POST':
         file = request.files.get('file')
         if file:
-            df = pd.read_excel(file)
-            # processing of file input data
-            return {'message': 'File Saved Successfuly'}, 200
-    return {'error': 'Invalid file type or missing file'}, 400
+            return jsonify({'redirect': url_for('download')})
+        else:
+            return jsonify({'error': 'Invalid file type or missing file'}), 400
+    return jsonify({'error': 'Invalid request method'}), 400
 
 @app.route('/download')
 def download():
     return render_template('pages/download.html')
 
+@app.route('/download-file')
+def download_file():
+    return send_file('/Users/prathyathakur/Master/Programming/SIH/sih24/flask_app_env/src/static/assets/demo_main.xlsx', as_attachment=True)
 
 # Database routes
 @app.route('/test_connection', methods=['GET'])

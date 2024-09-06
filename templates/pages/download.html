@@ -11,14 +11,18 @@
 
 <body class="w-full">
     {% include 'components/header.html' %}
-    <section class="h-[100vh] flex flex-col items-center">
-        
+    <section class="h-[100vh] flex flex-col items-center justify-center">
+        <div>
+            <button id="downloadButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Download</button>
+        </div>
     </section>
     {% include 'components/footer.html' %}
 </body>
 
 <script>
-    
+    document.getElementById('downloadButton').addEventListener('click', function () {
+        window.location.href = '/download-file';
+    });
 </script>
 
 </html>
