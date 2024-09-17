@@ -33,6 +33,10 @@ def download():
 def download_file():
     return send_file('/Users/prathyathakur/Master/Programming/SIH/sih24/flask_app_env/src/static/assets/demo_main.xlsx', as_attachment=True)
 
+@app.route('/profile')
+def profile():
+    return render_template('pages/profile.html')
+
 # Database routes
 @app.route('/test_connection', methods=['GET'])
 def test_connection():

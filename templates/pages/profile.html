@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Profile</title>
+    <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='assets/logo.svg') }}" type="image/x-icon">
+</head>
+
+<body class="w-full">
+    {% include 'components/header.html' %}
+    <section class="h-[100vh] flex flex-col items-center justify-center">
+        <p>Faculty Profile</p>
+    </section>
+    {% include 'components/footer.html' %}
+</body>
+
+<script>
+    document.getElementById('downloadButton').addEventListener('click', function () {
+        window.location.href = '/download-file';
+    });
+</script>
+
+</html>

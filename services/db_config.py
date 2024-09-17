@@ -1,7 +1,6 @@
 import os
 from pymongo import MongoClient, errors
 from dotenv import load_dotenv
-from pymongo.common import MAX_POOL_SIZE, SERVER_SELECTION_TIMEOUT
 
 load_dotenv()
 
