@@ -11,8 +11,30 @@
 
 <body class="w-full">
     {% include 'components/header.html' %}
-    <section class="h-[100vh] flex flex-col items-center justify-center">
-        <p>Faculty Profile</p>
+    <section class="h-[100vh] flex flex-col items-center">
+        <div class="mt-[8rem] w-[85%] flex flex-col">
+            <p class="text-3xl">{{ faculty.author_name }}</p>
+            <hr class="w-full">
+            <div class="mt-[3rem] w-full flex justify-between">
+                <!-- table -->
+                <div class="w-[75%] flex flex-col items-center rounded-md p-2 gap-2">
+                    <div class="w-full flex items-center">
+                        <p class="w-[60%]">Title</p>
+                        <p class="w-[30%] text-center">Journal</p>
+                        <p class="w-[10%] text-center">Year</p>
+                        <p class="w-[10%] text-center">Abstract</p>
+                    </div>
+                    <hr class="w-full">
+                    
+                    {% for row in faculty.research %}
+                        {% include 'components/tableRow.html' %}
+                    {% endfor %}
+                </div>
+
+                <!-- sidebar -->
+                <div class="w-[22%] border">adfa</div>
+            </div>
+        </div>
     </section>
     {% include 'components/footer.html' %}
 </body>

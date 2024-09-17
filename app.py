@@ -35,7 +35,29 @@ def download_file():
 
 @app.route('/profile')
 def profile():
-    return render_template('pages/profile.html')
+    faculty = {
+        "author_name": "Dr. Alice Smith",
+        "institution": "University of AI Research",
+        "email": "alice.smith@university.edu",
+        "address": "123 Research Lane, AI City, AI 45678",
+        "research": [
+            {
+                "title": "Deep Learning for Image Recognition",
+                "year": 2022,
+                "journal": "Journal of Computer Vision",
+                "abstract": "This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+                "link": "http://example.com/deep-learning-image-recognition"
+            },
+            {
+                "title": "Advancements in Natural Language Processing",
+                "year": 2021,
+                "journal": "Journal of AI Research",
+                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+                "link": "http://example.com/advancements-nlp"
+            }
+        ]
+    }
+    return render_template('pages/profile.html', faculty=faculty)
 
 # Database routes
 @app.route('/test_connection', methods=['GET'])
