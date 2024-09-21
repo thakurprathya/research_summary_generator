@@ -11,13 +11,10 @@ mongodb_db = os.getenv('MONGODB_DB')
 def get_db_connection():
     try:
         client = MongoClient(mongodb_uri, serverselectiontimeoutms=5000, maxpoolsize=5000)
-        client.admin.command('ping')
-        client.server_info()
         db = client[mongodb_db] if mongodb_db is not None else None
         
         if db is not None:
             faculty_collection = db['faculty']
-            faculty_collection.create_index('name', unique=True)
             return db, "Connection successful"
         else:
             raise Exception("Database not found")
