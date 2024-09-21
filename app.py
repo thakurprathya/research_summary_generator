@@ -1,4 +1,5 @@
 import os
+import bibtexparser
 import pandas as pd
 from flask import Flask, render_template, request, render_template, jsonify, redirect, url_for, send_file
 from werkzeug.exceptions import BadRequest
@@ -20,6 +21,21 @@ def upload():
     if request.method == 'POST':
         file = request.files.get('file')
         if file:
+            extension = file.filename.split(".")[-1]
+
+            # calls to Scrapping functions here
+            if(extension == "xlsx"):
+                print("xlsx")
+            else:
+                bib_data = file.read().decode('utf-8')
+                bib_database = bibtexparser.loads(bib_data)
+                entries = bib_database.entries
+                df = pd.DataFrame(entries)
+
+                column_order = ['author', 'year', 'title', 'journal', 'address', 'institution']
+                df = df.reindex(columns=column_order)
+                print(df.iloc[:, 0]) 
+
             return jsonify({'redirect': url_for('download')})
         else:
             return jsonify({'error': 'Invalid file type or missing file'}), 400
@@ -31,7 +47,7 @@ def download():
 
 @app.route('/download-file')
 def download_file():
-    return send_file('/Users/prathyathakur/Master/Programming/SIH/sih24/flask_app_env/src/static/assets/demo_main.xlsx', as_attachment=True)
+    return send_file('D:\Lang\sih\src\static\\assets\demo_main.xlsx', as_attachment=True)
 
 # Database routes
 @app.route('/test_connection', methods=['GET'])

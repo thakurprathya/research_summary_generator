@@ -72,6 +72,7 @@ def getProfile(df: pd.DataFrame) -> pd.DataFrame | None:
     try:
         faculty_list = df.iloc[1:, 2].tolist()
         name = df.iloc[1, 0]
+        year = df.iloc[1:, 1].tolist()
         
         links = getLinks(name, faculty_list)
         if(links):
@@ -81,6 +82,7 @@ def getProfile(df: pd.DataFrame) -> pd.DataFrame | None:
                 if(abstracts):
                     dfOutput = pd.DataFrame({
                         "name": [name] * len(faculty_list),
+                        "year": year,
                         "title": faculty_list,
                         "link": links,
                         "abstract": abstracts

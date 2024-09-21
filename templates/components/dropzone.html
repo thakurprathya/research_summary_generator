@@ -16,13 +16,13 @@
             </label>
             <p class="pl-1 text-[#76ABAE]">or drag and drop</p>
         </div>
-        <p class="text-[14px] leading-8 text-[#eeeeee] font-semibold">.xlsx, .ods</p>
+        <p class="text-[14px] leading-8 text-[#eeeeee] font-semibold">.xlsx, .bib</p>
     </div>
 </div>
 
 <script>
     const dropZone = document.querySelector('.dropzone');
-    const allowedExtensions = ['xlsx', 'ods'];
+    const allowedExtensions = ['xlsx', 'bib'];
 
     dropZone.addEventListener('dragover', (event) => {
         event.preventDefault();
