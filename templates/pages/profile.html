@@ -12,19 +12,24 @@
 <body class="w-full">
     {% include 'components/header.html' %}
     <section class="h-[100vh] flex flex-col items-center">
-        <div class="mt-[8rem] w-[85%] flex flex-col">
-            <p class="text-3xl">{{ faculty.author_name }}</p>
-            <hr class="w-full">
+        <div class="mt-[12rem] w-[85%] flex flex-col">
+            <div class="flex flex-col items-start mb-12 w-[60%] self-center">
+                <div class="w-full flex items-baseline justify-between">
+                    <h3 class="text-3xl">{{ faculty.author_name }}</h3>
+                    <h6 class="text-md">{{ faculty.institution }}</h6>
+                </div>
+                <hr class="w-full self-center border-[#76ABAE]">
+            </div>
             <div class="mt-[3rem] w-full flex justify-between">
                 <!-- table -->
-                <div class="w-[75%] flex flex-col items-center rounded-md p-2 gap-2">
+                <div class="w-[75%] flex flex-col items-center p-2 gap-2 border-r pr-10">
                     <div class="w-full flex items-center">
                         <p class="w-[60%]">Title</p>
                         <p class="w-[30%] text-center">Journal</p>
                         <p class="w-[10%] text-center">Year</p>
                         <p class="w-[10%] text-center">Abstract</p>
                     </div>
-                    <hr class="w-full">
+                    <hr class="w-full border-[#76ABAE]">
                     
                     {% for row in faculty.research %}
                         {% include 'components/tableRow.html' %}
@@ -32,7 +37,35 @@
                 </div>
 
                 <!-- sidebar -->
-                <div class="w-[22%] border">adfa</div>
+                <div class="w-[22%] flex flex-col items-start">
+                    <div class="flex flex-col items-start gap-2 mb-8 ">
+                        {% if (faculty.email and faculty.email != "") or (faculty.address and faculty.address != "") %}
+                            <h2 class="border-b border-[#76ABAE] py-2 mb-1">Contact Information</h2>
+                            {% if faculty.email and faculty.email != "" %}
+                                <p class="flex items-center gap-2 text-sm">
+                                    email: 
+                                    <a href="mailto:{{ faculty.email }}" class="underline">{{ faculty.email }}</a>
+                                </p>
+                            {% endif %}
+                            {% if faculty.address and faculty.address != "" %}
+                                <p class="flex items-center gap-2 text-sm">
+                                    address: {{ faculty.address }}
+                                </p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-col items-start gap-2">
+                        <h2 class="border-b border-[#76ABAE] py-2 mb-1">Filters</h2>
+                        <div id="yearFilters" class="flex items-start gap-3">
+                            {% for year in years %}
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" class="year-checkbox cursor-pointer" value="{{ year }}">
+                                    {{ year }}
+                                </label>
+                            {% endfor %}
+                        </div>                        
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -40,8 +73,22 @@
 </body>
 
 <script>
-    document.getElementById('downloadButton').addEventListener('click', function () {
-        window.location.href = '/download-file';
+    document.addEventListener('DOMContentLoaded', function() {
+
+        document.querySelectorAll('.year-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', filterResearch);
+        });
+
+        function filterResearch() {
+            const selectedYears = Array.from(document.querySelectorAll('.year-checkbox:checked')).map(cb => cb.value);
+            const rows = document.querySelectorAll('.tablerow');
+
+            rows.forEach(row => {
+                const rowYear = row.getAttribute('data-year');
+                if (selectedYears.length === 0 || selectedYears.includes(rowYear)) row.style.display = '';
+                else row.style.display = 'none';
+            });
+        }
     });
 </script>
 
