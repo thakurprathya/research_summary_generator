@@ -11,12 +11,18 @@
 
 <body class="w-full">
     {% include 'components/header.html' %}
-    <section class="h-[100vh] flex flex-col items-center justify-center">
-        <div class="flex items-center gap-5">
-            <button id="downloadButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Download</button>
-            <button id="profileButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Profile</button>
-        </div>
+    
+    <section class="flex items-center justify-center mt-28 gap-5">
+        <button id="downloadButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Download</button>
+        <button id="profileButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Profile</button>
     </section>
+
+    <section class="m-[10%] flex gap-10 items-center justify-center flex-wrap">
+        {% include 'components/profilecard.html' %}
+        {% include 'components/profilecard.html' %}
+        {% include 'components/profilecard.html' %}
+    </section>
+    
     {% include 'components/footer.html' %}
 </body>
 

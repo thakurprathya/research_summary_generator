@@ -1,0 +1,17 @@
+<div id="card" class="border border-gray-300 rounded-lg p-4 max-w-xs text-center">
+    <div class="text-4xl font-bold bg-[#76ABAE] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+        A
+    </div>
+    <h2 class="text-xl font-semibold mb-5">Ashish Khanna</h2>
+    <div class="text-left">
+        <p class="mb-2"><strong class="mr-2">Institution:</strong>Maharaja Agrasen Institute of Technology</p>
+        <p class="mb-2"><strong class="mr-2">Email:</strong> <a href="mailto:{{ email }}" class="no-underline">ashish.khanna@mait.edu</a></p>
+        <p class="mb-2"><strong class="mr-3">Address:</strong>Sadak Pe</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('card').addEventListener('click', () => {
+        window.location.href = '/profile';
+    });
+</script>
