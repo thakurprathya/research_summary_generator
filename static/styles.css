@@ -10,6 +10,8 @@
     padding: 0;
     color: white;
     overflow-x: hidden;
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
 }
 
 body {
@@ -24,6 +26,23 @@ body {
 
 .dropzone.active {
     @apply blur-sm;
+}
+
+/* Remove internal buttons in Chrome, Safari, Edge, and Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Remove internal buttons in Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Hide scrollbars in WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    display: none;
 }
 
 @keyframes typing {

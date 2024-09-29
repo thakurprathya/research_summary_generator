@@ -86,7 +86,7 @@ def profile():
                 "title": "Advancements in Natural Language Processing3",
                 "year": 2021,
                 "journal": "Journal of AI Researc3",
-                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+                "abstract": "An 321412 overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
                 "link": "http://example.com/advancements-nlp"
             }
         ]
@@ -99,6 +99,7 @@ def profile():
     years = sorted(set(research['year'] for research in faculty['research']), reverse=True)
 
     return render_template('pages/profile.html', faculty=faculty, years=years)
+
 
 # Database routes
 @app.route('/test_connection', methods=['GET'])
