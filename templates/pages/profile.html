@@ -11,8 +11,8 @@
 
 <body class="w-full">
     {% include 'components/header.html' %}
-    <section class="h-[100vh] flex flex-col items-center">
-        <div class="mt-[12rem] w-[85%] flex flex-col">
+    <section class="min-h-[100vh] flex flex-col items-center">
+        <div class="mt-[12rem] w-[85%] flex flex-col mb-[2rem]">
             <div class="flex flex-col items-start mb-12 w-[60%] self-center">
                 <div class="w-full flex items-baseline justify-between">
                     <h3 class="text-3xl">{{ faculty.author_name }}</h3>
@@ -64,13 +64,14 @@
                                 </label>
                             {% endfor %}
                         </div> 
-                        <!-- <div class="flex flex-col mt-4">
+                        <div class="flex flex-col text-[#222831] mt-4">
                             <label for="startYear">Start Year:</label>
-                            <input type="number" id="startYear" class="border rounded p-1">
+                            <input type="number" id="startYear" class="border w-[90%] rounded-md p-1">
                             <label for="endYear" class="mt-2">End Year:</label>
-                            <input type="number" id="endYear" class="border rounded p-1">
-                            <button id="applyRange" class="mt-2 bg-[#76ABAE] text-white rounded p-1">Apply Range</button>
-                        </div>                      -->
+                            <input type="number" id="endYear" class="border w-[90%] rounded-md p-1">
+                            <button id="applyRange" class="mt-2 bg-[#76ABAE] hover:bg-[#2cb1b8] text-white w-[90%] rounded-md p-1">Apply Range</button>
+                            <button id="clearRange" class="mt-2 bg-red-400 hover:bg-red-600 text-white w-[90%] rounded-md p-1">Clear</button>
+                        </div>                     
                     </div>
                 </div>
             </div>
@@ -88,12 +89,80 @@
 
         function filterResearch() {
             const selectedYears = Array.from(document.querySelectorAll('.year-checkbox:checked')).map(cb => cb.value);
+            const startYear = document.getElementById('startYear').value = null;
+            const endYear = document.getElementById('endYear').value = null;
+            
             const rows = document.querySelectorAll('.tablerow');
-
             rows.forEach(row => {
                 const rowYear = row.getAttribute('data-year');
-                if (selectedYears.length === 0 || selectedYears.includes(rowYear)) row.style.display = '';
-                else row.style.display = 'none';
+                if (selectedYears.length === 0 || selectedYears.includes(rowYear)){
+                    row.style.display = '';
+                    const accordions = document.querySelectorAll(`.accordion-${rowYear}`);
+                    accordions.forEach(acc => {
+                        acc.style.display = '';
+                    });
+                } 
+                else{
+                    row.style.display = 'none';
+                    const accordions = document.querySelectorAll(`.accordion-${rowYear}`);
+                    accordions.forEach(acc => {
+                        acc.style.display = 'none';
+                    });
+                }
+            });
+        }
+
+        document.getElementById('applyRange').addEventListener('click', applyRangeFilter);
+
+        function applyRangeFilter() {
+            const startYear = document.getElementById('startYear').value;
+            const endYear = document.getElementById('endYear').value;
+            const rows = document.querySelectorAll('.tablerow');
+
+            if (!startYear || !endYear) return;
+
+            if (parseInt(startYear) > parseInt(endYear)) {
+                alert('Start year should be less than or equal to end year');
+                return;
+            }
+
+            rows.forEach(row => {
+                const rowYear = parseInt(row.getAttribute('data-year'));
+                if (rowYear >= parseInt(startYear) && rowYear <= parseInt(endYear)) {
+                    row.style.display = '';
+                    const accordions = document.querySelectorAll(`.accordion-${rowYear}`);
+                    accordions.forEach(acc => {
+                        acc.style.display = '';
+                    });
+                } else {
+                    row.style.display = 'none';
+                    const accordions = document.querySelectorAll(`.accordion-${rowYear}`);
+                    accordions.forEach(acc => {
+                        acc.style.display = 'none';
+                    });
+                }
+            });
+        }
+
+        document.getElementById('clearRange').addEventListener('click', HandleClearFilter);
+
+        function HandleClearFilter() {
+            const startYear = document.getElementById('startYear').value = null;
+            const endYear = document.getElementById('endYear').value = null;
+
+            const checkedCheckboxes = document.querySelectorAll('.year-checkbox:checked');
+            checkedCheckboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+
+            const rows = document.querySelectorAll('.tablerow');
+            rows.forEach(row => {
+                const rowYear = parseInt(row.getAttribute('data-year'));
+                row.style.display = '';
+                const accordions = document.querySelectorAll(`.accordion-${rowYear}`);
+                    accordions.forEach(acc => {
+                        acc.style.display = '';
+                    });
             });
         }
     });

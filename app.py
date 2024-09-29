@@ -197,6 +197,7 @@ def profile():
 
     return render_template('pages/profile.html', faculty=faculty, years=years)
 
+
 # Database routes
 @app.route('/test_connection', methods=['GET'])
 def test_connection():
