@@ -53,6 +53,53 @@ def download():
 def download_file():
     return send_file('D:\Lang\sih\src\static\\assets\demo_main.xlsx', as_attachment=True)
 
+@app.route('/profile')
+def profile():
+    faculty = {
+        "author_name": "Dr. Alice Smith",
+        "institution": "Maharaja Agrasen Institute of Technology",
+        "email": "alice.smith@university.edu",
+        "address": "123 Research Lane, AI City, AI 45678",
+        "research": [
+            {
+                "title": "Deep Learning for Image Recognition",
+                "year": 2022,
+                "journal": "Journal of Computer Vision",
+                "abstract": "This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+                "link": "http://example.com/deep-learning-image-recognition"
+            },
+            {
+                "title": "Advancements in Natural Language Processing1",
+                "year": 2021,
+                "journal": "Journal of AI Research1",
+                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+                "link": "http://example.com/advancements-nlp"
+            },
+            {
+                "title": "Advancements in Natural Language Processing2",
+                "year": 2023,
+                "journal": "Journal of AI Research2",
+                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+                "link": "http://example.com/advancements-nlp"
+            },
+            {
+                "title": "Advancements in Natural Language Processing3",
+                "year": 2021,
+                "journal": "Journal of AI Researc3",
+                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+                "link": "http://example.com/advancements-nlp"
+            }
+        ]
+    }
+
+    # Sorting the research list by year in descending order
+    faculty['research'] = sorted(faculty['research'], key=lambda x: x['year'], reverse=True)
+
+    # Extract unique years
+    years = sorted(set(research['year'] for research in faculty['research']), reverse=True)
+
+    return render_template('pages/profile.html', faculty=faculty, years=years)
+
 # Database routes
 @app.route('/test_connection', methods=['GET'])
 def test_connection():
