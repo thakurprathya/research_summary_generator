@@ -13,7 +13,11 @@
 <body class="dropzone w-full" ondragover="allowDrop(event)" ondrop="drop(event)">
     {% include 'components/header.html' %}
 
-    <section>
+    <section id="loading-screen" style="display: none;">
+        {% include 'components/loading.html' %}
+    </section>
+
+    <section id="content">
         <img src="{{ url_for('static', filename='assets/gradient.png') }}" alt="bg"
             class="absolute top-0 left-0 z-[-1]">
         <div class="h-[100vh] flex flex-col lg:flex-row items-center justify-center">
@@ -28,12 +32,11 @@
         </div>
     </section>
 
-
-    {% include 'components/loading.html' %}
     {% include 'components/footer.html' %}
 
     <script>        
         document.addEventListener("DOMContentLoaded", function () {
+            // Typing Effect
             const heroTextElement = document.getElementById("hero-text");
             const phrases = [
                 "Your Research, Summarized!",
@@ -77,6 +80,7 @@
             }
 
             setTimeout(typeEffect, 1000);
+
 
             // handling scrollto url parameter
             const urlParams = new URLSearchParams(window.location.search);

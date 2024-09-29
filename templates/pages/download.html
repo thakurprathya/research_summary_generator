@@ -12,8 +12,9 @@
 <body class="w-full">
     {% include 'components/header.html' %}
     <section class="h-[100vh] flex flex-col items-center justify-center">
-        <div>
+        <div class="flex items-center gap-5">
             <button id="downloadButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Download</button>
+            <button id="profileButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Profile</button>
         </div>
     </section>
     {% include 'components/footer.html' %}
@@ -22,6 +23,9 @@
 <script>
     document.getElementById('downloadButton').addEventListener('click', function () {
         window.location.href = '/download-file';
+    });
+    document.getElementById('profileButton').addEventListener('click', function () {
+        window.location.href = '/profile';
     });
 </script>
 

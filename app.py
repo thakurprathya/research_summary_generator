@@ -1,4 +1,5 @@
 import os
+import time
 import bibtexparser
 import pandas as pd
 from flask import Flask, render_template, request, render_template, jsonify, redirect, url_for, send_file
@@ -22,6 +23,9 @@ def upload():
         file = request.files.get('file')
         if file:
             extension = file.filename.split(".")[-1]
+
+            # testing loading screen
+            time.sleep(5)
 
             # calls to Scrapping functions here
             if(extension == "xlsx"):
