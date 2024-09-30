@@ -13,6 +13,6 @@
 
 <script>
     document.getElementById('card-{{ faculty.author_name + faculty.institution + faculty.email }}').addEventListener('click', () => {
-        window.location.href = '/profile';
+        window.location.href = '/profile?data={{ faculty.encrypted_data }}';
     });
 </script>

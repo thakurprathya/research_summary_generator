@@ -1,11 +1,13 @@
 import os
 import time
+import json
 import bibtexparser
 import pandas as pd
 from flask import Flask, render_template, request, render_template, jsonify, redirect, url_for, send_file
 from werkzeug.exceptions import BadRequest
 from services.models import create_faculty, get_all
 from services.db_config import get_db_connection
+from services.utils import encrypt_data, decrypt_data
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -183,7 +185,15 @@ def download():
         }
     ]
 
-    return render_template('pages/download.html', faculties=faculties)
+    encrypted_faculties = [
+        {
+            **faculty,
+            'encrypted_data': encrypt_data(json.dumps(faculty))
+        }
+        for faculty in faculties
+    ]
+
+    return render_template('pages/download.html', faculties=encrypted_faculties)
 
 @app.route('/download-file')
 def download_file():
@@ -191,50 +201,52 @@ def download_file():
 
 @app.route('/profile')
 def profile():
-    faculty = {
-        "author_name": "Dr. Alice Smith",
-        "institution": "Maharaja Agrasen Institute of Technology",
-        "email": "alice.smith@university.edu",
-        "address": "123 Research Lane, AI City, AI 45678",
-        "research": [
-            {
-                "title": "Deep Learning for Image Recognition",
-                "year": 2022,
-                "journal": "Journal of Computer Vision",
-                "abstract": "This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-                "link": "http://example.com/deep-learning-image-recognition"
-            },
-            {
-                "title": "Advancements in Natural Language Processing1",
-                "year": 2021,
-                "journal": "Journal of AI Research1",
-                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-                "link": "http://example.com/advancements-nlp"
-            },
-            {
-                "title": "Advancements in Natural Language Processing2",
-                "year": 2023,
-                "journal": "Journal of AI Research2",
-                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-                "link": "http://example.com/advancements-nlp"
-            },
-            {
-                "title": "Advancements in Natural Language Processing3",
-                "year": 2021,
-                "journal": "Journal of AI Researc3",
-                "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-                "link": "http://example.com/advancements-nlp"
-            }
-        ]
-    }
+    # faculty = {
+    #     "author_name": "Dr. Alice Smith",
+    #     "institution": "Maharaja Agrasen Institute of Technology",
+    #     "email": "alice.smith@university.edu",
+    #     "address": "123 Research Lane, AI City, AI 45678",
+    #     "research": [
+    #         {
+    #             "title": "Deep Learning for Image Recognition",
+    #             "year": 2022,
+    #             "journal": "Journal of Computer Vision",
+    #             "abstract": "This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+    #             "link": "http://example.com/deep-learning-image-recognition"
+    #         },
+    #         {
+    #             "title": "Advancements in Natural Language Processing1",
+    #             "year": 2021,
+    #             "journal": "Journal of AI Research1",
+    #             "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+    #             "link": "http://example.com/advancements-nlp"
+    #         },
+    #         {
+    #             "title": "Advancements in Natural Language Processing2",
+    #             "year": 2023,
+    #             "journal": "Journal of AI Research2",
+    #             "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+    #             "link": "http://example.com/advancements-nlp"
+    #         },
+    #         {
+    #             "title": "Advancements in Natural Language Processing3",
+    #             "year": 2021,
+    #             "journal": "Journal of AI Researc3",
+    #             "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
+    #             "link": "http://example.com/advancements-nlp"
+    #         }
+    #     ]
+    # }
 
-    # Sorting the research list by year in descending order
-    faculty['research'] = sorted(faculty['research'], key=lambda x: x['year'], reverse=True)
+    faculty = request.args.get('data')
+    if faculty:
+        faculty = json.loads(decrypt_data(faculty))
+        faculty['research'] = sorted(faculty['research'], key=lambda x: x['year'], reverse=True) # Sorting the research list by year in descending order
+        years = sorted(set(research['year'] for research in faculty['research']), reverse=True) # Extract unique years
 
-    # Extract unique years
-    years = sorted(set(research['year'] for research in faculty['research']), reverse=True)
-
-    return render_template('pages/profile.html', faculty=faculty, years=years)
+        return render_template('pages/profile.html', faculty=faculty, years=years)
+    
+    return "No data available", 400
 
 
 # Database routes
