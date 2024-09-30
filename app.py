@@ -183,11 +183,11 @@ def download():
         }
     ]
 
-    return render_template('pages/download.html')
+    return render_template('pages/download.html', faculties=faculties)
 
 @app.route('/download-file')
 def download_file():
-    return send_file('D:\Lang\sih\src\static\\assets\demo_main.xlsx', as_attachment=True)
+    return send_file('/Users/prathyathakur/Master/Programming/SIH/sih24/flask_app_env_12/src/static/assets/demo.xlsx', as_attachment=True)
 
 @app.route('/profile')
 def profile():

@@ -11,27 +11,21 @@
 
 <body class="w-full">
     {% include 'components/header.html' %}
-    
-    <section class="flex items-center justify-center mt-28 gap-5">
-        <button id="downloadButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Download</button>
-        <button id="profileButton" class="px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Profile</button>
-    </section>
+    <section class="min-h-[100vh] flex flex-col items-center justify-start">
+        <button id="downloadButton" class="mt-[10rem] px-10 py-4 bg-gray-700 rounded-lg hover:bg-gray-500">Download Summaries</button>
 
-    <section class="m-[10%] flex gap-10 items-center justify-center flex-wrap">
-        {% include 'components/profilecard.html' %}
-        {% include 'components/profilecard.html' %}
-        {% include 'components/profilecard.html' %}
+        <div class="m-10 w-[90%] flex items-center justify-center gap-10 flex-wrap">
+            {% for faculty in faculties %}
+                {% include 'components/profilecard.html' %}
+            {% endfor %}
+        </div>
     </section>
-    
     {% include 'components/footer.html' %}
 </body>
 
 <script>
     document.getElementById('downloadButton').addEventListener('click', function () {
         window.location.href = '/download-file';
-    });
-    document.getElementById('profileButton').addEventListener('click', function () {
-        window.location.href = '/profile';
     });
 </script>
 

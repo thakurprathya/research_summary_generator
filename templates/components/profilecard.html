@@ -1,17 +1,18 @@
-<div id="card" class="border border-gray-300 rounded-lg p-4 max-w-xs text-center">
+<div id="card-{{ faculty.author_name + faculty.institution + faculty.email }}" class="border border-gray-300 rounded-lg p-4 max-w-xs text-center cursor-pointer">
     <div class="text-4xl font-bold bg-[#76ABAE] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-        A
+        {% set first_name_initial = faculty.author_name.split(' ')[1][0] %}
+        {{ first_name_initial }}
     </div>
-    <h2 class="text-xl font-semibold mb-5">Ashish Khanna</h2>
+    <h2 class="text-xl font-semibold mb-5">{{ faculty.author_name }}</h2>
     <div class="text-left">
-        <p class="mb-2"><strong class="mr-2">Institution:</strong>Maharaja Agrasen Institute of Technology</p>
-        <p class="mb-2"><strong class="mr-2">Email:</strong> <a href="mailto:{{ email }}" class="no-underline">ashish.khanna@mait.edu</a></p>
-        <p class="mb-2"><strong class="mr-3">Address:</strong>Sadak Pe</p>
+        <p class="mb-2"><strong class="mr-2">Institution:</strong>{{ faculty.institution }}</p>
+        <p class="mb-2"><strong class="mr-2">Email:</strong> <a href="mailto:{{ email }}" class="no-underline">{{ faculty.email }}</a></p>
+        <p class="mb-2"><strong class="mr-3">Address:</strong>{{ faculty.address }}</p>
     </div>
 </div>
 
 <script>
-    document.getElementById('card').addEventListener('click', () => {
+    document.getElementById('card-{{ faculty.author_name + faculty.institution + faculty.email }}').addEventListener('click', () => {
         window.location.href = '/profile';
     });
 </script>
