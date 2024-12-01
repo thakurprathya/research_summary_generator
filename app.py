@@ -238,9 +238,21 @@ def profile():
     #     ]
     # }
 
+    # faculty['research'] = sorted(faculty['research'], key=lambda x: x['year'], reverse=True) # Sorting the research list by year in descending order
+    # years = sorted(set(research['year'] for research in faculty['research']), reverse=True) # Extract unique years
+
+    # return render_template('pages/profile.html', faculty=faculty, years=years)
+
     faculty = request.args.get('data')
     if faculty:
-        faculty = json.loads(decrypt_data(faculty))
+        try:
+            faculty = faculty.replace(' ', '+')  # Fix URL-safe base64 padding
+            decrypted_data = decrypt_data(faculty)
+            if isinstance(decrypted_data, bytes):
+                decrypted_data = decrypted_data.decode('utf-8')
+            faculty = json.loads(decrypted_data)
+        except Exception as e:
+            return f"Error decrypting data: {str(e)}", 400
         faculty['research'] = sorted(faculty['research'], key=lambda x: x['year'], reverse=True) # Sorting the research list by year in descending order
         years = sorted(set(research['year'] for research in faculty['research']), reverse=True) # Extract unique years
 
