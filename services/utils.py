@@ -2,8 +2,8 @@ import os
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import base64
-import json
 from dotenv import load_dotenv
+from models import get_research_by_title
 
 load_dotenv()
 
@@ -27,3 +27,13 @@ def decrypt_data(data):
     decrypted = unpad(cipher.decrypt(encrypted_data), AES.block_size)
 
     return decrypted.decode('utf-8')
+
+def update_row(row):
+    research = get_research_by_title(row['email'], row['publicationTitle'])
+    if research:
+        row['abstract'] = research['abstract']
+        row['publicationLink'] = research['publicationLink']
+        if not row['journal'] or row['journal'] == '':
+            row['journal'] = research['journal']
+        return False  # Skip this row as it exists
+    return True  # Keep this row

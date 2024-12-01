@@ -4,7 +4,6 @@ import pandas as pd
 import time
 from bs4 import BeautifulSoup as bs
 
-# Define the llama model to be used for summary generation
 model = "llama3.1:8b"
 
 def printErr(e: Exception) -> None:

@@ -5,9 +5,10 @@ import bibtexparser
 import pandas as pd
 from flask import Flask, render_template, request, render_template, jsonify, redirect, url_for, send_file
 from werkzeug.exceptions import BadRequest
-from services.models import create_faculty, get_all
+from services.models import add_faculty_to_db, get_allfaculty
 from services.db_config import get_db_connection
-from services.utils import encrypt_data, decrypt_data
+from services.utils import encrypt_data, decrypt_data, update_row
+from services.functions.main import getLinks, getAbstract, getBodyScrape
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -26,21 +27,33 @@ def upload():
         if file:
             extension = file.filename.split(".")[-1]
 
-            # testing loading screen
-            time.sleep(5)
-
-            # calls to Scrapping functions here
             if(extension == "xlsx"):
-                print("xlsx")
+                df = pd.read_excel(file)
+                df = df.rename(columns={'Faculty Name': 'name', 'Email': 'email', 'Address': 'address', 'Institution': 'institution', 'Year':'year', 'Publication Title': 'publicationTitle'})
+                df['journal'] = ''
             else:
+                # parsing bib-tex file and creating a dataframe
                 bib_data = file.read().decode('utf-8')
                 bib_database = bibtexparser.loads(bib_data)
                 entries = bib_database.entries
                 df = pd.DataFrame(entries)
 
-                column_order = ['author', 'year', 'title', 'journal', 'address', 'institution']
-                df = df.reindex(columns=column_order)
-                print(df.iloc[:, 0]) 
+                column_order = ['author', 'email', 'address', 'institution', 'year', 'title', 'journal']
+                for col in column_order:
+                    if col not in df.columns:
+                        df[col] = ''
+                df = df[column_order]
+                df = df.rename(columns={'author': 'name', 'title': 'publicationTitle'})
+
+            df['publicationLink'] = ''
+            df['abstract'] = ''
+            # updating data for rows where research exists in db
+            df = df[df.apply(update_row, axis=1)]
+            # populating links only for empty rows
+            df.loc[df['publicationLink'] == '', 'publicationLink'] = df[df['publicationLink'] == ''].apply(lambda x: getLinks(x['name'], x['publicationTitle']), axis=1)
+            # populating abstract only for empty rows
+            df.loc[df['abstract'] == '', 'abstract'] = df[df['abstract'] == ''].apply(lambda x: getAbstract(getBodyScrape(x['publicationLink'])) if x['publicationLink'] else '', axis=1)
+            # populating journal only for empty rows
 
             return jsonify({'redirect': url_for('download')})
         else:
@@ -201,48 +214,6 @@ def download_file():
 
 @app.route('/profile')
 def profile():
-    # faculty = {
-    #     "author_name": "Dr. Alice Smith",
-    #     "institution": "Maharaja Agrasen Institute of Technology",
-    #     "email": "alice.smith@university.edu",
-    #     "address": "123 Research Lane, AI City, AI 45678",
-    #     "research": [
-    #         {
-    #             "title": "Deep Learning for Image Recognition",
-    #             "year": 2022,
-    #             "journal": "Journal of Computer Vision",
-    #             "abstract": "This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-    #             "link": "http://example.com/deep-learning-image-recognition"
-    #         },
-    #         {
-    #             "title": "Advancements in Natural Language Processing1",
-    #             "year": 2021,
-    #             "journal": "Journal of AI Research1",
-    #             "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-    #             "link": "http://example.com/advancements-nlp"
-    #         },
-    #         {
-    #             "title": "Advancements in Natural Language Processing2",
-    #             "year": 2023,
-    #             "journal": "Journal of AI Research2",
-    #             "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-    #             "link": "http://example.com/advancements-nlp"
-    #         },
-    #         {
-    #             "title": "Advancements in Natural Language Processing3",
-    #             "year": 2021,
-    #             "journal": "Journal of AI Researc3",
-    #             "abstract": "An overview of recent advancements in natural language processing technologies.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.This research explores the use of deep learning techniques in image recognition tasks.",
-    #             "link": "http://example.com/advancements-nlp"
-    #         }
-    #     ]
-    # }
-
-    # faculty['research'] = sorted(faculty['research'], key=lambda x: x['year'], reverse=True) # Sorting the research list by year in descending order
-    # years = sorted(set(research['year'] for research in faculty['research']), reverse=True) # Extract unique years
-
-    # return render_template('pages/profile.html', faculty=faculty, years=years)
-
     faculty = request.args.get('data')
     if faculty:
         try:
@@ -281,10 +252,13 @@ def add_faculty():
             
         name = data.get('name')
         research = data.get('research', [])
-        if not name or not research:
-            raise BadRequest("Name and Research is required")
+        email = data.get('email')
+        institution = data.get('institution', '')
+        address = data.get('address', '')
+        if not name or not research or not email or not institution or not address:
+            raise BadRequest("Required Inofrmation not present...")
         
-        faculty_id = create_faculty(name, research)
+        faculty_id = add_faculty_to_db(name, email, address, research, institution)
         return jsonify({'message': 'Faculty member added successfully', 'id': faculty_id}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -292,7 +266,7 @@ def add_faculty():
 @app.route('/get_all_faculty', methods=['GET'])
 def get_all_faculty():
     try:
-        faculty_members = get_all()
+        faculty_members = get_allfaculty()
         return jsonify(faculty_members)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
