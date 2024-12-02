@@ -28,15 +28,15 @@ def decrypt_data(data):
 
     return decrypted.decode('utf-8')
 
-def update_row(row):
-    research = get_research_by_title(row['email'], row['publicationTitle'])
-    if research:
-        row['abstract'] = research['abstract']
-        row['publicationLink'] = research['publicationLink']
-        if not row['journal'] or row['journal'] == '':
-            row['journal'] = research['journal']
-        return False  # Skip this row as it exists
-    return True  # Keep this row
+def update_df(df):
+    for index, row in df.iterrows():
+        research = get_research_by_title(row['email'], row['publicationTitle'])
+        if research:
+            df.at[index, 'abstract'] = research['abstract']
+            df.at[index, 'publicationLink'] = research['publicationLink']
+            if not row['journal'] or row['journal'] == '':
+                df.at[index, 'journal'] = research['journal']
+    return df
 
 def df_to_profile(df):
     profiles = []

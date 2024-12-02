@@ -26,7 +26,7 @@ def get_research_by_title(email, publication_title):
     
     if faculty:
         for research in faculty['research']:
-            if research['publicationTitle'] == publication_title:
+            if research['publicationTitle'].lower() == publication_title.lower():
                 return research
     return None
 
