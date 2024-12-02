@@ -3,15 +3,20 @@ import time
 import json
 import bibtexparser
 import pandas as pd
-from flask import Flask, render_template, request, render_template, jsonify, redirect, url_for, send_file
+from flask import Flask, render_template, request, render_template, jsonify, url_for, send_file, session
 from werkzeug.exceptions import BadRequest
-from services.models import add_faculty_to_db, get_allfaculty
+from flask_cors import CORS
+from dotenv import load_dotenv
+from services.models import add_faculty_to_db, get_allFaculty, get_facultyById
 from services.db_config import get_db_connection
 from services.utils import encrypt_data, decrypt_data, update_df, df_to_profile
 from services.functions.main import get_publication_link, get_abstract_and_journal
-from flask_cors import CORS
+
+load_dotenv()
+secret_key = os.getenv('SECRET_KEY').encode('utf-8')
 
 app = Flask(__name__)
+app.secret_key = secret_key
 CORS(app)
 db, connection_status = get_db_connection()
 
@@ -49,6 +54,8 @@ def upload():
             df['abstract'] = ''
             df['name'] = df['name'].astype(str)
             df['publicationTitle'] = df['publicationTitle'].astype(str)
+            df = df.dropna(subset=['name', 'publicationTitle'])
+            df = df.fillna('')
 
             # removing duplicates
             df = df.drop_duplicates(subset=['email', 'publicationTitle'], keep='first')
@@ -71,8 +78,9 @@ def upload():
 
             # creating a list of dictionaries out of a dataframe
             faculty_profiles = df_to_profile(df)
-            
+
             # Add each faculty profile to the database
+            faculty_ids = []
             for profile in faculty_profiles:
                 try:
                     response = app.test_client().post('/add_faculty', 
@@ -85,9 +93,15 @@ def upload():
                         },
                         content_type='application/json'
                     )
+                    response_data = response.get_json()
+                    profile['_id'] = response_data['id']
+                    faculty_ids.append(response_data['id'])
                 except Exception as e:
                     print(f"Error adding faculty {profile['name']}: {str(e)}")
-            
+
+            # storing information in session
+            session['faculty_ids'] = faculty_ids
+
             return jsonify({'redirect': url_for('download')})
         else:
             return jsonify({'error': 'Invalid file type or missing file'}), 400
@@ -95,151 +109,20 @@ def upload():
 
 @app.route('/download')
 def download():
-    faculties = [
-        {
-            "author_name": "Dr. Ashish Khanna",
-            "institution": "Maharaja Agrasen Institute of Technology",
-            "email": "ashishkhanna@mait.edu",
-            "address": "12/2 1st Floor, Nehru Enclave East",
-            "research": [
-                {
-                    "title": "Early diagnosis of COVID-19-affected patients based on X-ray and computed tomography images using deep learning algorithm",
-                    "year": 2022,
-                    "journal": "Journal of COVID-19 diagnosis",
-                    "abstract": "The study investigates the use of deep learning algorithms to diagnose COVID-19 from chest X-ray and computed tomography (CT) images, aiming for early detection of the virus. Traditional diagnostic methods, like reverse transcription-polymerase chain reaction (RT-PCR) tests, have limitations in terms of speed and availability. The research proposes a model trained on radiographic data to identify COVID-19 infections with improved accuracy and speed. This automated diagnostic approach has the potential to ease the burden on healthcare systems, particularly in regions with limited testing resources. The model could serve as a supplemental tool to enhance early diagnosis and optimize treatment strategies during the pandemic.",
-                    "link": "https://pubmed.ncbi.nlm.nih.gov/32904395/"
-                },
-                {
-                    "title": "A novel deep learning-based multi-model ensemble method for the prediction of neuromuscular disorders",
-                    "year": 2021,
-                    "journal": "Journal of neuromuscular disorders",
-                    "abstract": "This study proposes a novel deep learning-based multi-model ensemble method for predicting neuromuscular disorders. The approach combines the strengths of multiple deep learning models to improve the accuracy of predicting these complex disorders. The ensemble method leverages the strengths of convolutional neural networks (CNNs), recurrent neural networks (RNNs), and long short-term memory (LSTM) networks to analyze various data types, including medical images, clinical data, and genomic data. The proposed method is evaluated on a dataset of patients with neuromuscular disorders and demonstrates superior performance compared to individual models. The results show improved accuracy, sensitivity, and specificity in predicting neuromuscular disorders, highlighting the potential of this approach in clinical practice. However, please note that the article has been retracted, indicating that the findings may not be reliable or valid.",
-                    "link": "https://www.researchgate.net/publication/327100282_RETRACTED_ARTICLE_Usability_feature_extraction_using_modified_crow_search_algorithm_a_novel_approach"
-                },
-                {
-                    "title": "Enhancing Consumer Electronics in Healthcare 4.0: Integrating Passive FBG Sensor and IoMT Technology for Remote HRV Monitoring",
-                    "year": 2024,
-                    "journal": "Journal of Healthcare Electronics",
-                    "abstract": "This study explores the integration of passive Fiber Bragg Grating (FBG) sensors and Internet of Medical Things (IoMT) technology to enhance remote heart rate variability (HRV) monitoring in healthcare. The proposed system utilizes FBG sensors to measure physiological parameters, such as heart rate and blood pressure, and transmits the data to a cloud-based platform via IoMT technology. The system enables real-time remote monitoring of HRV, allowing for early detection of cardiovascular diseases and stress-related disorders. The authors demonstrate the feasibility and accuracy of the proposed system, highlighting its potential to revolutionize remote healthcare monitoring. The study contributes to the advancement of consumer electronics in healthcare, enabling personalized and preventive medicine.",
-                    "link": "https://www.researchgate.net/publication/382087783_Enhancing_Consumer_Electronics_in_Healthcare_40_Integrating_Passive_FBG_Sensor_and_IoMT_Technology_for_Remote_HRV_Monitoring"
-                },
-                {
-                    "title": "Robot-Assisted Video Endoscopic Inguinal Lymph Node Dissection for Penile Cancer: An Indian Multicenter Experience",
-                    "year": 2024,
-                    "journal": "Journal of Penile Cancer",
-                    "abstract": "This study investigates the effects of a mindfulness-based stress reduction (MBSR) program on symptoms of anxiety and depression in patients with chronic pain. A randomized controlled trial was conducted, with 100 participants assigned to either an MBSR group or a wait-list control group. The MBSR program consisted of eight weekly sessions, and participants' symptoms of anxiety and depression were assessed at pre-intervention, post-intervention, and follow-up. The results show that the MBSR group demonstrated significant reductions in symptoms of anxiety and depression compared to the control group. Additionally, the MBSR group showed improvements in sleep quality and life satisfaction. The study concludes that MBSR is a effective intervention for reducing symptoms of anxiety and depression in patients with chronic pain, and highlights the importance of mindfulness-based interventions in pain management.",
-                    "link": "https://pubmed.ncbi.nlm.nih.gov/38661519/"
-                }]
-        },
-        {
-            "author_name": "Dr. John Doe",
-            "institution": "Indian Institute of Technology",
-            "email": "john.doe@iit.edu",
-            "address": "456 Innovation Blvd, Tech Town, TT 12345",
-            "research": [
-                {
-                    "title": "Machine Learning for Autonomous Systems",
-                    "year": 2020,
-                    "journal": "Journal of Robotics",
-                    "abstract": "",
-                    "link": "http://example.com/ml-autonomous-systems"
-                },
-                {
-                    "title": "Optimization Techniques for AI Models",
-                    "year": 2021,
-                    "journal": "Journal of AI Optimization",
-                    "abstract": "",
-                    "link": "http://example.com/optimization-techniques"
-                }]
-        },
-        {
-            "author_name": "Dr. Emma Johnson",
-            "institution": "Delhi Technological University",
-            "email": "emma.johnson@dtu.edu",
-            "address": "789 Academic Way, Science Park, SP 98765",
-            "research": [
-                {
-                    "title": "Neural Networks for Financial Forecasting",
-                    "year": 2022,
-                    "journal": "Journal of Financial Data Science",
-                    "abstract": "",
-                    "link": "http://example.com/neural-networks-financial-forecasting"
-                },
-                {
-                    "title": "AI in Healthcare Diagnostics",
-                    "year": 2019,
-                    "journal": "Healthcare AI Journal",
-                    "abstract": "",
-                    "link": "http://example.com/ai-healthcare-diagnostics"
-                },
-                {
-                    "title": "Reinforcement Learning for Game AI",
-                    "year": 2021,
-                    "journal": "Journal of Game Theory and AI",
-                    "abstract": "",
-                    "link": "http://example.com/rl-game-ai"
-                }]
-        },
-        {
-            "author_name": "Dr. William Taylor",
-            "institution": "Birla Institute of Technology and Science",
-            "email": "william.taylor@bits.edu",
-            "address": "321 Scholar Drive, Knowledge City, KC 65432",
-            "research": [
-                {
-                    "title": "Quantum Computing for Cryptography",
-                    "year": 2021,
-                    "journal": "Journal of Quantum Research",
-                    "abstract": "",
-                    "link": "http://example.com/quantum-computing-cryptography"
-                },
-                {
-                    "title": "Big Data Analytics for Social Media",
-                    "year": 2022,
-                    "journal": "Journal of Data Science",
-                    "abstract": "",
-                    "link": "http://example.com/big-data-social-media"
-                },
-                {
-                    "title": "AI-driven Predictive Maintenance",
-                    "year": 2020,
-                    "journal": "Journal of Industrial AI",
-                    "abstract": "",
-                    "link": "http://example.com/ai-predictive-maintenance"
-                }]
-        },
-        {
-            "author_name": "Dr. Sarah Lee",
-            "institution": "National Institute of Technology",
-            "email": "sarah.lee@nit.edu",
-            "address": "987 Technology Blvd, Tech City, TC 87654",
-            "research": [
-                {
-                    "title": "Blockchain for Secure Transactions",
-                    "year": 2021,
-                    "journal": "Journal of Blockchain and Cryptography",
-                    "abstract": "",
-                    "link": "http://example.com/blockchain-secure-transactions"
-                },
-                {
-                    "title": "AI Applications in Smart Cities",
-                    "year": 2023,
-                    "journal": "Journal of Smart Systems",
-                    "abstract": "",
-                    "link": "http://example.com/ai-smart-cities"
-                }]
-        }
-    ]
+    faculty_ids = session.get('faculty_ids', [])
+    faculty_profiles = []
 
-    encrypted_faculties = [
-        {
-            **faculty,
-            'encrypted_data': encrypt_data(json.dumps(faculty))
-        }
-        for faculty in faculties
-    ]
-
-    return render_template('pages/download.html', faculties=encrypted_faculties)
+    for id in faculty_ids:
+        response = app.test_client().get(f'/get_faculty_by_id/{id}')
+        faculty_data = response.get_json()
+        if faculty_data:
+            if not isinstance(faculty_data, dict):
+                faculty_data = json.loads(faculty_data)
+            if '_id' in faculty_data:
+                faculty_data['encrypted_id'] = encrypt_data(str(faculty_data['_id']))
+            faculty_profiles.append(faculty_data)
+    
+    return render_template('pages/download.html', faculties=faculty_profiles)
 
 @app.route('/download-file')
 def download_file():
@@ -247,16 +130,23 @@ def download_file():
 
 @app.route('/profile')
 def profile():
-    faculty = request.args.get('data')
-    if faculty:
+    id = request.args.get('faculty')
+    if id:
         try:
-            faculty = faculty.replace(' ', '+')  # Fix URL-safe base64 padding
-            decrypted_data = decrypt_data(faculty)
-            if isinstance(decrypted_data, bytes):
-                decrypted_data = decrypted_data.decode('utf-8')
-            faculty = json.loads(decrypted_data)
+            # decrypting faculty id
+            id = id.replace(' ', '+')  # Fix URL-safe base64 padding
+            decrypted_id = decrypt_data(id)
+            if not isinstance(decrypted_id, str):
+                decrypted_id = str(decrypted_id)
         except Exception as e:
             return f"Error decrypting data: {str(e)}", 400
+        
+        # fetching faculty data from db
+        response = app.test_client().get(f'/get_faculty_by_id/{decrypted_id}')
+        faculty = response.get_json()
+        if faculty and not isinstance(faculty, dict):
+            faculty = json.loads(faculty)
+
         faculty['research'] = sorted(faculty['research'], key=lambda x: x['year'], reverse=True) # Sorting the research list by year in descending order
         years = sorted(set(research['year'] for research in faculty['research']), reverse=True) # Extract unique years
 
@@ -272,7 +162,26 @@ def test_connection():
         return jsonify({'status': 'success', 'message': connection_status})
     else:
         return jsonify({'status': 'error', 'message': connection_status}), 500
-    
+
+@app.route('/get_all_faculty', methods=['GET'])
+def get_all_faculty():
+    try:
+        faculty_members = get_allFaculty()
+        return jsonify(faculty_members)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get_faculty_by_id/<faculty_id>', methods=['GET'])
+def get_faculty_by_id(faculty_id):
+    try:
+        faculty = get_facultyById(faculty_id)
+        if faculty:
+            return jsonify(faculty)
+        else:
+            return jsonify({'error': 'Faculty not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/add_faculty', methods=['POST'])
 def add_faculty():
     if not request.is_json:
@@ -295,14 +204,6 @@ def add_faculty():
         return jsonify({'message': 'Faculty member added successfully', 'id': faculty_id}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
-
-@app.route('/get_all_faculty', methods=['GET'])
-def get_all_faculty():
-    try:
-        faculty_members = get_allfaculty()
-        return jsonify(faculty_members)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

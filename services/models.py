@@ -1,5 +1,6 @@
 from services.db_config import get_db_connection
 from datetime import datetime, timezone
+from bson import ObjectId
 
 db, connection_status = get_db_connection()
 faculty_collection = db['faculty'] if db is not None else None
@@ -95,7 +96,7 @@ def add_faculty_to_db(name, email, address, research, institution):
     else:
         return create_faculty(name, email, address, research, institution)
 
-def get_allfaculty():
+def get_allFaculty():
     if db is None:
         raise RuntimeError("Database connection is not established.")
     
@@ -103,7 +104,7 @@ def get_allfaculty():
     faculty_list = []
     for faculty in faculty_members:
         faculty_list.append({
-            'id': str(faculty['_id']),
+            '_id': str(faculty['_id']),
             'name': faculty['name'],
             'email': faculty['email'],
             'address': faculty['address'],
@@ -112,6 +113,29 @@ def get_allfaculty():
             'created_at': faculty['created_at'].isoformat()
         })
     return faculty_list
+
+def get_facultyById(faculty_id):
+    if faculty_collection is None:
+        raise RuntimeError("Database connection is not established.")
+    
+    try:
+        object_id = ObjectId(faculty_id)
+    except Exception:
+        raise ValueError(f"Invalid faculty_id format: {faculty_id}")
+    
+    faculty = faculty_collection.find_one({'_id': object_id})
+    
+    if faculty:
+        return {
+            '_id': str(faculty['_id']),
+            'name': faculty['name'],
+            'email': faculty['email'],
+            'address': faculty['address'],
+            'institution': faculty['institution'],
+            'research': faculty['research'],
+            'created_at': faculty['created_at'].isoformat()
+        }
+    return None
 
 def validate_research(research):
     required_fields = ['year', 'publicationTitle', 'publicationLink', 'abstract', 'journal']
