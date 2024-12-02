@@ -3,13 +3,15 @@ import time
 import json
 import bibtexparser
 import pandas as pd
+import io
+from datetime import datetime
 from flask import Flask, render_template, request, render_template, jsonify, url_for, send_file, session
 from werkzeug.exceptions import BadRequest
 from flask_cors import CORS
 from dotenv import load_dotenv
 from services.models import add_faculty_to_db, get_allFaculty, get_facultyById
 from services.db_config import get_db_connection
-from services.utils import encrypt_data, decrypt_data, update_df, df_to_profile
+from services.utils import encrypt_data, decrypt_data, update_df, df_to_profile, profile_to_df
 from services.functions.main import get_publication_link, get_abstract_and_journal
 
 load_dotenv()
@@ -126,7 +128,36 @@ def download():
 
 @app.route('/download-file')
 def download_file():
-    return send_file('/Users/prathyathakur/Master/Programming/SIH/sih24/flask_app_env_12/src/static/assets/demo.xlsx', as_attachment=True)
+    faculty_ids = session.get('faculty_ids', [])
+    faculty_profiles = []
+
+    # Get faculty profiles
+    for id in faculty_ids:
+        response = app.test_client().get(f'/get_faculty_by_id/{id}')
+        faculty_data = response.get_json()
+        if faculty_data:
+            if not isinstance(faculty_data, dict):
+                faculty_data = json.loads(faculty_data)
+            faculty_profiles.append(faculty_data)
+    
+    df = profile_to_df(faculty_profiles)
+    
+    # Create Excel in memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Research Papers')
+    output.seek(0)
+    
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'research_papers_{timestamp}.xlsx'
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename
+    )
 
 @app.route('/profile')
 def profile():

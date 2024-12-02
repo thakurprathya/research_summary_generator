@@ -4,6 +4,7 @@ from Crypto.Util.Padding import pad, unpad
 import base64
 from dotenv import load_dotenv
 from .models import get_research_by_title
+import pandas as pd
 
 load_dotenv()
 
@@ -68,5 +69,28 @@ def df_to_profile(df):
             "research": research_list
         }
         profiles.append(profile)
-
+        
     return profiles
+
+def profile_to_df(profiles):
+    rows = []
+    for profile in profiles:
+        base_info = {
+            'name': profile['name'],
+            'email': profile['email'],
+            'institution': profile['institution'],
+            'address': profile['address']
+        }
+        
+        for research in profile['research']:
+            row = base_info.copy()
+            row.update({
+                'publicationTitle': research['publicationTitle'],
+                'year': research['year'],
+                'journal': research['journal'],
+                'abstract': research['abstract'],
+                'publicationLink': research['publicationLink']
+            })
+            rows.append(row)
+    
+    return pd.DataFrame(rows)
