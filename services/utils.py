@@ -3,7 +3,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import base64
 from dotenv import load_dotenv
-from models import get_research_by_title
+from .models import get_research_by_title
 
 load_dotenv()
 
@@ -37,3 +37,36 @@ def update_row(row):
             row['journal'] = research['journal']
         return False  # Skip this row as it exists
     return True  # Keep this row
+
+def df_to_profile(df):
+    profiles = []
+
+    # Grouping by 'name' to handle multiple faculties
+    grouped = df.groupby('name')
+
+    for name, group in grouped:
+        email = group['email'].iloc[0] if 'email' in group else ""
+        institution = group['institution'].iloc[0] if 'institution' in group else ""
+        address = group['address'].iloc[0] if 'address' in group else ""
+
+        research_list = []
+        for _, row in group.iterrows():
+            research_item = {
+                "publicationTitle": row.get("publicationTitle", ""),
+                "year": int(row.get("year", 0)) if str(row.get("year", "")).isdigit() else row.get("year", ""),
+                "journal": row.get("journal", ""),
+                "abstract": row.get("abstract", ""),
+                "publicationLink": row.get("publicationLink", "")
+            }
+            research_list.append(research_item)
+
+        profile = {
+            "name": name,
+            "email": email,
+            "institution": institution,
+            "address": address,
+            "research": research_list
+        }
+        profiles.append(profile)
+
+    return profiles

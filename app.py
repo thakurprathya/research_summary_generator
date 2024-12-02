@@ -7,8 +7,8 @@ from flask import Flask, render_template, request, render_template, jsonify, red
 from werkzeug.exceptions import BadRequest
 from services.models import add_faculty_to_db, get_allfaculty
 from services.db_config import get_db_connection
-from services.utils import encrypt_data, decrypt_data, update_row
-from services.functions.main import getLinks, getAbstract, getBodyScrape
+from services.utils import encrypt_data, decrypt_data, update_row, df_to_profile
+from services.functions.main import get_publication_link, get_abstract
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -47,15 +47,48 @@ def upload():
 
             df['publicationLink'] = ''
             df['abstract'] = ''
+            df['name'] = df['name'].astype(str)
+            df['publicationTitle'] = df['publicationTitle'].astype(str)
+            # removing duplicates
+            df = df.drop_duplicates(subset=['email', 'publicationTitle'], keep='first')
+            print(df)
+            print('line 52')
             # updating data for rows where research exists in db
             df = df[df.apply(update_row, axis=1)]
+            print(df)
+            print('line 55')
             # populating links only for empty rows
-            df.loc[df['publicationLink'] == '', 'publicationLink'] = df[df['publicationLink'] == ''].apply(lambda x: getLinks(x['name'], x['publicationTitle']), axis=1)
+            df.loc[df['publicationLink'] == '', 'publicationLink'] = df[df['publicationLink'] == ''].apply(lambda x: get_publication_link(x['name'], x['publicationTitle']), axis=1)
+            df['publicationLink'] = df['publicationLink'].astype(str)
+            print(df)
+            print('line 58')
             # populating abstract only for empty rows
-            df.loc[df['abstract'] == '', 'abstract'] = df[df['abstract'] == ''].apply(lambda x: getAbstract(getBodyScrape(x['publicationLink'])) if x['publicationLink'] else '', axis=1)
+            df.loc[df['abstract'] == '', 'abstract'] = df[df['abstract'] == ''].apply(lambda x: get_abstract(x['publicationLink']) if x['publicationLink'] else '', axis=1)
+            print(df)
+            print('line 61')
             # populating journal only for empty rows
 
-            return jsonify({'redirect': url_for('download')})
+            # creating a list of dictionaries out of a dataframe
+            faculty_profiles = df_to_profile(df)
+            print('line 66')
+            print(faculty_profiles)
+            # Add each faculty profile to the database
+            for profile in faculty_profiles:
+                try:
+                    response = app.test_client().post('/add_faculty', 
+                        json={
+                            'name': profile['name'],
+                            'email': profile['email'],
+                            'address': profile['address'],
+                            'institution': profile['institution'],
+                            'research': profile['research']
+                        },
+                        content_type='application/json'
+                    )
+                except Exception as e:
+                    print(f"Error adding faculty {profile['name']}: {str(e)}")
+            print('line 83')
+            # return jsonify({'redirect': url_for('download')})
         else:
             return jsonify({'error': 'Invalid file type or missing file'}), 400
     return jsonify({'error': 'Invalid request method'}), 400
