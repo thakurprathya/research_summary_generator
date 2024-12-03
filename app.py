@@ -6,6 +6,7 @@ import pandas as pd
 import io
 from datetime import datetime
 from flask import Flask, render_template, request, render_template, jsonify, url_for, send_file, session
+from flask_talisman import Talisman
 from werkzeug.exceptions import BadRequest
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -21,6 +22,19 @@ app = Flask(__name__)
 app.secret_key = secret_key
 CORS(app)
 db, connection_status = get_db_connection()
+
+Talisman(app, 
+    content_security_policy={
+        'default-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        'style-src': ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+        'style-src-elem': ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+        'font-src': ["'self'", "fonts.gstatic.com"],
+        'img-src': ["'self'", "data:", "https:"],
+        'connect-src': ["'self'", "*"]
+    },
+    force_https=False
+)
 
 # Application routes
 @app.route('/')
@@ -115,8 +129,7 @@ def download():
     faculty_profiles = []
 
     for id in faculty_ids:
-        response = app.test_client().get(f'/get_faculty_by_id/{id}')
-        faculty_data = response.get_json()
+        faculty_data = get_faculty_by_id(id).get_json()
         if faculty_data:
             if not isinstance(faculty_data, dict):
                 faculty_data = json.loads(faculty_data)
@@ -133,8 +146,7 @@ def download_file():
 
     # Get faculty profiles
     for id in faculty_ids:
-        response = app.test_client().get(f'/get_faculty_by_id/{id}')
-        faculty_data = response.get_json()
+        faculty_data = get_faculty_by_id(id).get_json()
         if faculty_data:
             if not isinstance(faculty_data, dict):
                 faculty_data = json.loads(faculty_data)
@@ -149,7 +161,7 @@ def download_file():
     output.seek(0)
     
     # Generate filename with timestamp
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime('%B-%d-%Y_%H-%M')
     filename = f'research_papers_{timestamp}.xlsx'
     
     return send_file(
@@ -173,8 +185,9 @@ def profile():
             return f"Error decrypting data: {str(e)}", 400
         
         # fetching faculty data from db
-        response = app.test_client().get(f'/get_faculty_by_id/{decrypted_id}')
-        faculty = response.get_json()
+        faculty = get_faculty_by_id(decrypted_id).get_json()
+        if not faculty:
+            return "Faculty not found", 404
         if faculty and not isinstance(faculty, dict):
             faculty = json.loads(faculty)
 
@@ -235,6 +248,16 @@ def add_faculty():
         return jsonify({'message': 'Faculty member added successfully', 'id': faculty_id}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({'error': 'Resource not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Internal server error'}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

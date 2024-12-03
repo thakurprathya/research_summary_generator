@@ -43,13 +43,13 @@
                             <h2 class="border-b border-[#76ABAE] py-2 mb-1">Contact Information</h2>
                             {% if faculty.email and faculty.email != "" %}
                                 <p class="flex items-center gap-2 text-sm">
-                                    email: 
+                                    Email: 
                                     <a href="mailto:{{ faculty.email }}" class="underline">{{ faculty.email }}</a>
                                 </p>
                             {% endif %}
                             {% if faculty.address and faculty.address != "" %}
                                 <p class="flex items-center gap-2 text-sm">
-                                    address: {{ faculty.address }}
+                                    Address: {{ faculty.address }}
                                 </p>
                             {% endif %}
                         </div>
@@ -66,9 +66,9 @@
                         </div> 
                         <div class="flex flex-col text-[#222831] mt-4">
                             <label for="startYear">Start Year:</label>
-                            <input type="number" id="startYear" class="border w-[90%] rounded-md p-1">
+                            <input type="number" id="startYear" class="border w-[90%] rounded-md p-1 px-2 focus:outline-none" onkeydown="return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) || !isNaN(Number(event.key))">
                             <label for="endYear" class="mt-2">End Year:</label>
-                            <input type="number" id="endYear" class="border w-[90%] rounded-md p-1">
+                            <input type="number" id="endYear" class="border w-[90%] rounded-md p-1 px-2 focus:outline-none" onkeydown="return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) || !isNaN(Number(event.key))">
                             <button id="applyRange" class="mt-2 bg-[#76ABAE] hover:bg-[#2cb1b8] text-white w-[90%] rounded-md p-1">Apply Range</button>
                             <button id="clearRange" class="mt-2 bg-red-400 hover:bg-red-600 text-white w-[90%] rounded-md p-1">Clear</button>
                         </div>                     
@@ -82,6 +82,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        HandleClearFilter();
 
         document.querySelectorAll('.year-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', filterResearch);
@@ -125,6 +127,11 @@
                 alert('Start year should be less than or equal to end year');
                 return;
             }
+
+            const checkedCheckboxes = document.querySelectorAll('.year-checkbox:checked');
+            checkedCheckboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
 
             rows.forEach(row => {
                 const rowYear = parseInt(row.getAttribute('data-year'));
